@@ -1,12 +1,18 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AddTransactionForm from '../components/AddTransactionForm';
+import EditTransactionForm from '../components/EditTransactionForm';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState(null);
+  const [searchCategory, setSearchCategory] = useState('');
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -23,19 +29,43 @@ const TransactionsPage = () => {
           },
         });
         setTransactions(response.data);
+        setFilteredTransactions(response.data);
       } catch (error) {
         setError('Ошибка при получении данных о транзакциях');
-        console.log(error);
       }
     };
 
     fetchTransactions();
   }, []);
 
+  useEffect(() => {
+    let filtered = transactions;
+
+    if (searchCategory) {
+      filtered = filtered.filter((transaction) =>
+        transaction.category.toLowerCase().includes(searchCategory.toLowerCase())
+      );
+    }
+
+    if (minAmount !== '') {
+      filtered = filtered.filter((transaction) => transaction.amount >= parseFloat(minAmount));
+    }
+
+    if (maxAmount !== '') {
+      filtered = filtered.filter((transaction) => transaction.amount <= parseFloat(maxAmount));
+    }
+
+    setFilteredTransactions(filtered);
+  }, [searchCategory, minAmount, maxAmount, transactions]);
+
   const handleAddTransaction = (newTransaction) => {
+    setTransactions([...transactions, newTransaction]);
+  };
+
+  const handleEditTransaction = (editedTransaction) => {
     setTransactions((prevTransactions) =>
       prevTransactions.map((transaction) =>
-        transaction.id === newTransaction.id ? newTransaction : transaction
+        transaction.id === editedTransaction.id ? editedTransaction : transaction
       )
     );
   };
@@ -65,7 +95,30 @@ const TransactionsPage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Транзакции</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      {transactions.length > 0 ? (
+      <div className="mb-4 flex space-x-4">
+        <input
+          type="text"
+          placeholder="Поиск по категории"
+          value={searchCategory}
+          onChange={(e) => setSearchCategory(e.target.value)}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+        <input
+          type="number"
+          placeholder="Минимальная сумма"
+          value={minAmount}
+          onChange={(e) => setMinAmount(e.target.value)}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+        <input
+          type="number"
+          placeholder="Максимальная сумма"
+          value={maxAmount}
+          onChange={(e) => setMaxAmount(e.target.value)}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+      {filteredTransactions.length > 0 ? (
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden mb-4">
           <thead className="bg-gray-800 text-white">
             <tr>
@@ -78,26 +131,26 @@ const TransactionsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {transactions.map((transaction) => (
+            {filteredTransactions.map((transaction) => (
               <tr key={transaction.id} className="border-b">
                 <td className="py-2 px-4">{transaction.id}</td>
                 <td className="py-2 px-4">{new Date(transaction.date).toLocaleDateString()}</td>
-                <td className="py-2 px-4">{transaction.type}</td>
+                <td className="py-2 px-4">{transaction.type === 'Income' ? 'Доход' : 'Расход'}</td>
                 <td className="py-2 px-4">{transaction.amount}</td>
                 <td className="py-2 px-4">{transaction.category}</td>
-                <td className="py-2 px-4">
+                <td className="py-2 px-4 flex justify-center">
                   <button
                     onClick={() => {
                       setTransactionToEdit(transaction);
-                      setIsModalOpen(true);
+                      setIsEditModalOpen(true);
                     }}
-                    className="text-blue-500 hover:text-blue-700 mr-2"
+                    className="bg-blue-200 hover:bg-blue-300 text-blue-700 font-bold py-1 px-3 rounded mr-2"
                   >
                     Редактировать
                   </button>
                   <button
                     onClick={() => handleDeleteTransaction(transaction.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-1 px-3 rounded"
                   >
                     Удалить
                   </button>
@@ -110,10 +163,7 @@ const TransactionsPage = () => {
         <p>Загрузка данных...</p>
       )}
       <button
-        onClick={() => {
-          setTransactionToEdit(null);
-          setIsModalOpen(true);
-        }}
+        onClick={() => setIsModalOpen(true)}
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
       >
         Добавить транзакцию
@@ -122,6 +172,12 @@ const TransactionsPage = () => {
         <AddTransactionForm
           onClose={() => setIsModalOpen(false)}
           onAddTransaction={handleAddTransaction}
+        />
+      )}
+      {isEditModalOpen && (
+        <EditTransactionForm
+          onClose={() => setIsEditModalOpen(false)}
+          onEditTransaction={handleEditTransaction}
           transactionToEdit={transactionToEdit}
         />
       )}

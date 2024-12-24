@@ -1,3 +1,4 @@
+import 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import AuthPage from './pages/AuthPage';
@@ -8,7 +9,7 @@ const App = () => {
   return (
     <Router>
       <Header />
-      <main className="container mx-auto p-4">
+      <main className="container mx-auto p-4 mt-24">
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/transactions" element={<TransactionsPage />} />

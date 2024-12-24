@@ -29,7 +29,6 @@ const AuthPage = () => {
 
       // Перенаправляем пользователя на страницу профиля
       navigate('/profile');
-    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setError('Неверный логин или пароль');
     }

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const AddTransactionForm = ({ onClose, onAddTransaction }) => {
-  const [newTransaction, setNewTransaction] = useState({
+const EditTransactionForm = ({ onClose, onEditTransaction, transactionToEdit }) => {
+  const [editedTransaction, setEditedTransaction] = useState({
     date: '',
     type: 'Income',
     amount: '',
@@ -10,10 +10,21 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
   });
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (transactionToEdit) {
+      setEditedTransaction({
+        date: transactionToEdit.date,
+        type: transactionToEdit.type,
+        amount: transactionToEdit.amount,
+        category: transactionToEdit.category,
+      });
+    }
+  }, [transactionToEdit]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewTransaction({
-      ...newTransaction,
+    setEditedTransaction({
+      ...editedTransaction,
       [name]: value,
     });
   };
@@ -26,46 +37,46 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
       return;
     }
 
-    if (newTransaction.category.length > 16) {
+    if (editedTransaction.category.length > 16) {
       setError('Имя категории не должно превышать 16 символов');
       return;
     }
 
-    if (parseFloat(newTransaction.amount) > 9999) {
+    if (parseFloat(editedTransaction.amount) > 9999) {
       setError('Сумма не должна превышать 9999');
       return;
     }
-    if (parseFloat(newTransaction.amount) < 0) {
+    if (parseFloat(editedTransaction.amount) < 0) {
       setError('Сумма должна быть больше 0');
       return;
     }
 
     const transactionData = {
-      id: 0,
-      date: newTransaction.date,
-      type: newTransaction.type,
-      amount: parseFloat(newTransaction.amount),
-      category: newTransaction.category,
+      id: transactionToEdit.id,
+      date: editedTransaction.date,
+      type: editedTransaction.type,
+      amount: parseFloat(editedTransaction.amount),
+      category: editedTransaction.category,
     };
 
     try {
-      const response = await axios.post('http://localhost:5205/api/Transactions', transactionData, {
+      const response = await axios.put(`http://localhost:5205/api/Transactions/${transactionToEdit.id}`, transactionData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      onAddTransaction(response.data);
+      onEditTransaction(response.data);
       onClose();
     } catch (error) {
-      alert('Ошибка при добавлении новой транзакции');
+      alert('Ошибка при редактировании транзакции');
     }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Добавить транзакцию</h2>
+        <h2 className="text-2xl font-bold mb-4">Редактировать транзакцию</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -77,7 +88,7 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
               id="date"
               name="date"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={newTransaction.date}
+              value={editedTransaction.date}
               onChange={handleInputChange}
               required
             />
@@ -90,7 +101,7 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
               id="type"
               name="type"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={newTransaction.type}
+              value={editedTransaction.type}
               onChange={handleInputChange}
               required
             >
@@ -107,7 +118,7 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
               id="amount"
               name="amount"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={newTransaction.amount}
+              value={editedTransaction.amount}
               onChange={handleInputChange}
               max="9999"
               min="1"
@@ -123,7 +134,7 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
               id="category"
               name="category"
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={newTransaction.category}
+              value={editedTransaction.category}
               onChange={handleInputChange}
               maxLength="16"
             />
@@ -149,4 +160,4 @@ const AddTransactionForm = ({ onClose, onAddTransaction }) => {
   );
 };
 
-export default AddTransactionForm;
+export default EditTransactionForm;

@@ -1,4 +1,4 @@
-import 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
@@ -13,9 +13,12 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-blue-600 text-white shadow-md">
+    <header className="fixed top-0 w-full bg-blue-600 text-white shadow-md z-50">
       <nav className="container mx-auto flex justify-between items-center p-4">
-        <div className="text-2xl font-bold">Контроль Трат</div>
+        <div className="text-2xl font-bold flex items-center">
+          <img src="/logo.svg" alt="Logo" className="h-8 w-8 mr-2" />
+          Контроль финансов
+        </div>
         <ul className="flex space-x-6">
           <li>
             <Link
