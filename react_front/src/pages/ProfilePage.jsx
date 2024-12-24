@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const ProfilePage = () => {
@@ -24,6 +24,7 @@ const ProfilePage = () => {
           },
         });
         setNetBalance(response.data);
+      // eslint-disable-next-line no-unused-vars
       } catch (error) {
         setError('Ошибка при получении данных о балансе');
       }
@@ -46,6 +47,7 @@ const ProfilePage = () => {
           },
         });
         setReports(response.data);
+      // eslint-disable-next-line no-unused-vars
       } catch (error) {
         setError('Ошибка при получении данных о тратах и полученных средствах');
       }

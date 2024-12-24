@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
 
 const AuthPage = () => {
   const [login, setLogin] = useState('');
@@ -12,19 +13,23 @@ const AuthPage = () => {
     e.preventDefault();
     setError('');
 
+    // Хэширование пароля
+    const hashedPassword = CryptoJS.MD5(password).toString();
+
     try {
       const response = await axios.post('http://localhost:5205/api/Auth', {
         login,
-        password,
+        password: hashedPassword,
       });
 
       // Сохраняем токен и данные пользователя в localStorage
       localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('userLogin', login);
-      localStorage.setItem('userPassword', password);
+      localStorage.setItem('userPassword', hashedPassword);
 
       // Перенаправляем пользователя на страницу профиля
       navigate('/profile');
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setError('Неверный логин или пароль');
     }
