@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
@@ -25,12 +25,16 @@ const AuthPage = () => {
       // Сохраняем токен и данные пользователя в localStorage
       localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('userLogin', login);
-      localStorage.setItem('userPassword', hashedPassword);
+      localStorage.setItem('userPassword', password); // Сохраняем введенный пользователем пароль
 
       // Перенаправляем пользователя на страницу профиля
       navigate('/profile');
     } catch (error) {
-      setError('Неверный логин или пароль');
+      if (error.response && error.response.status === 403) {
+        setError('Недостаточно прав для выполнения этого действия');
+      } else {
+        setError('Неверный логин или пароль');
+      }
     }
   };
 

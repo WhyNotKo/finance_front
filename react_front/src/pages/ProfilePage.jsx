@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const ProfilePage = () => {
@@ -24,9 +24,12 @@ const ProfilePage = () => {
           },
         });
         setNetBalance(response.data);
-      // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        setError('Ошибка при получении данных о балансе');
+        if (error.response && error.response.status === 403) {
+          setError('Недостаточно прав для выполнения этого действия');
+        } else {
+          setError('Ошибка при получении данных о балансе');
+        }
       }
     };
 
@@ -37,19 +40,19 @@ const ProfilePage = () => {
         return;
       }
 
-      const startDate = '2024-01-01'; // Пример начальной даты
-      const endDate = '2024-12-31'; // Пример конечной даты
-
       try {
-        const response = await axios.get(`http://localhost:5205/api/Reports?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await axios.get('http://localhost:5205/api/Reports', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         setReports(response.data);
-      // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        setError('Ошибка при получении данных о тратах и полученных средствах');
+        if (error.response && error.response.status === 403) {
+          setError('Недостаточно прав для выполнения этого действия');
+        } else {
+          setError('Ошибка при получении данных о тратах и полученных средствах');
+        }
       }
     };
 
@@ -58,16 +61,26 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-1">
       <h1 className="text-3xl font-bold mb-4">Профиль</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {userLogin && userPassword && netBalance !== null && reports !== null ? (
-        <div>
-          <p>Логин: {userLogin}</p>
-          <p>Пароль: {userPassword}</p>
-          <p>Количество трат: {reports.totalExpense}</p>
-          <p>Количество полученных средств: {reports.totalIncome}</p>
-          <p>Баланс: {netBalance}</p>
+        <div className="border border-black p-4 rounded-lg shadow-md">
+          <div className="mb-2 p-2 border-b border-gray-100">
+            <p className="font-bold">Логин: {userLogin}</p>
+          </div>
+          <div className="mb-2 p-2 border-b border-gray-100">
+            <p className="font-bold">Пароль: {userPassword}</p>
+          </div>
+          <div className="mb-2 p-2 border-b border-gray-100">
+            <p className="font-bold">Количество трат: {reports.totalExpense}</p>
+          </div>
+          <div className="mb-2 p-2 border-b border-gray-100">
+            <p className="font-bold">Количество полученных средств: {reports.totalIncome}</p>
+          </div>
+          <div className="p-2">
+            <p className="font-bold">Баланс: {netBalance}</p>
+          </div>
         </div>
       ) : (
         <p>Загрузка данных...</p>

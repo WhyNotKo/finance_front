@@ -31,7 +31,11 @@ const TransactionsPage = () => {
         setTransactions(response.data);
         setFilteredTransactions(response.data);
       } catch (error) {
-        setError('Ошибка при получении данных о транзакциях');
+        if (error.response && error.response.status === 403) {
+          setError('Недостаточно прав для выполнения этого действия');
+        } else {
+          setError('Ошибка при получении данных о транзакциях');
+        }
       }
     };
 
@@ -87,7 +91,11 @@ const TransactionsPage = () => {
         prevTransactions.filter((transaction) => transaction.id !== id)
       );
     } catch (error) {
-      setError('Ошибка при удалении транзакции');
+      if (error.response && error.response.status === 403) {
+        setError('Недостаточно прав для выполнения этого действия');
+      } else {
+        setError('Ошибка при удалении транзакции');
+      }
     }
   };
 
@@ -119,46 +127,48 @@ const TransactionsPage = () => {
         />
       </div>
       {filteredTransactions.length > 0 ? (
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden mb-4">
-          <thead className="bg-gray-800 text-white">
-            <tr>
-              <th className="py-2 px-4">ID</th>
-              <th className="py-2 px-4">Дата</th>
-              <th className="py-2 px-4">Тип</th>
-              <th className="py-2 px-4">Сумма</th>
-              <th className="py-2 px-4">Категория</th>
-              <th className="py-2 px-4">Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTransactions.map((transaction) => (
-              <tr key={transaction.id} className="border-b">
-                <td className="py-2 px-4">{transaction.id}</td>
-                <td className="py-2 px-4">{new Date(transaction.date).toLocaleDateString()}</td>
-                <td className="py-2 px-4">{transaction.type === 'Income' ? 'Доход' : 'Расход'}</td>
-                <td className="py-2 px-4">{transaction.amount}</td>
-                <td className="py-2 px-4">{transaction.category}</td>
-                <td className="py-2 px-4 flex justify-center">
-                  <button
-                    onClick={() => {
-                      setTransactionToEdit(transaction);
-                      setIsEditModalOpen(true);
-                    }}
-                    className="bg-blue-200 hover:bg-blue-300 text-blue-700 font-bold py-1 px-3 rounded mr-2"
-                  >
-                    Редактировать
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTransaction(transaction.id)}
-                    className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-1 px-3 rounded"
-                  >
-                    Удалить
-                  </button>
-                </td>
+        <div className="border border-black p-4 rounded-lg">
+          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden mb-4">
+            <thead className="bg-gray-800 text-white">
+              <tr>
+                <th className="py-2 px-4">ID</th>
+                <th className="py-2 px-4">Дата</th>
+                <th className="py-2 px-4">Тип</th>
+                <th className="py-2 px-4">Сумма</th>
+                <th className="py-2 px-4">Категория</th>
+                <th className="py-2 px-4">Действия</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction) => (
+                <tr key={transaction.id} className="border-b">
+                  <td className="py-2 px-4">{transaction.id}</td>
+                  <td className="py-2 px-4">{new Date(transaction.date).toLocaleDateString()}</td>
+                  <td className="py-2 px-4">{transaction.type === 'Income' ? 'Доход' : 'Расход'}</td>
+                  <td className="py-2 px-4">{transaction.amount}</td>
+                  <td className="py-2 px-4">{transaction.category}</td>
+                  <td className="py-2 px-4 flex justify-center">
+                    <button
+                      onClick={() => {
+                        setTransactionToEdit(transaction);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="bg-blue-200 hover:bg-blue-300 text-blue-700 font-bold py-1 px-3 rounded mr-2"
+                    >
+                      Редактировать
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTransaction(transaction.id)}
+                      className="bg-red-200 hover:bg-red-300 text-red-700 font-bold py-1 px-3 rounded"
+                    >
+                      Удалить
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p>Загрузка данных...</p>
       )}
