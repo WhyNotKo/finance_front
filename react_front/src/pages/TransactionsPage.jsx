@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AddTransactionForm from '../components/AddTransactionForm';
 import EditTransactionForm from '../components/EditTransactionForm';
+import { useNavigate } from 'react-router-dom';
 
 const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
@@ -13,15 +14,16 @@ const TransactionsPage = () => {
   const [searchCategory, setSearchCategory] = useState('');
   const [minAmount, setMinAmount] = useState('');
   const [maxAmount, setMaxAmount] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setError('Токен авторизации не найден');
-        return;
-      }
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
 
+    const fetchTransactions = async () => {
       try {
         const response = await axios.get('http://localhost:5205/api/Transactions', {
           headers: {
@@ -40,7 +42,7 @@ const TransactionsPage = () => {
     };
 
     fetchTransactions();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     let filtered = transactions;
